@@ -4,102 +4,96 @@
 $(document).ready(function ()
 {
 
+  // get country stats
       function countryCovid(country){
-        $('#countryConfirm').html('<small style="font-size:10px">Loading...</small>');
-      $('#countryDeath').html('<small style="font-size:10px">Loading...</small>');
-      $('#countryRecover').html('<small style="font-size:10px">Loading...</small>');
+        $('#countryConfirm').html('<small style="font-size:10px">Loading...</small>')
+      $('#countryDeath').html('<small style="font-size:10px">Loading...</small>')
+      $('#countryRecover').html('<small style="font-size:10px">Loading...</small>')
+      $('#countryActive').html('<small style="font-size:10px">Loading...</small>')
         $.ajax({
        type: "POST",
        url: "https://covid19.mathdro.id/api/countries/"+country,
       success: function(covid){
-      //covid=JSON.parse(covid_raw);
-          console.log(covid);                                         
-      $('#countryConfirm').html(numberWithCommas(covid.confirmed.value));
-      $('#countryDeath').html(numberWithCommas(covid.deaths.value));
-      $('#countryRecover').html(numberWithCommas(covid.recovered.value));
+      //covid=JSON.parse(covid_raw)
+          //console.log(covid)
+      $('#countryConfirm').html(numberWithCommas(covid.confirmed.value))
+      $('#countryDeath').html(numberWithCommas(covid.deaths.value))
+      $('#countryRecover').html(numberWithCommas(covid.recovered.value))
+      $('#countryActive').html(numberWithCommas(parseInt(covid.confirmed.value)-(parseInt(covid.deaths.value)+parseInt(covid.recovered.value))))
+
       }
-      });
+      })
       }
 
+// get global stats
        function globalCovid(){
-        $('#globalConfirm').html('<small style="font-size:10px">Loading...</small>');
-      $('#globalDeath').html('<small style="font-size:10px">Loading...</small>');
-      $('#globalRecover').html('<small style="font-size:10px">Loading...</small>');
+        $('#globalConfirm').html('<small style="font-size:10px">Loading...</small>')
+      $('#globalDeath').html('<small style="font-size:10px">Loading...</small>')
+      $('#globalRecover').html('<small style="font-size:10px">Loading...</small>')
+      $('#globalActive').html('<small style="font-size:10px">Loading...</small>')
         $.ajax({
        type: "POST",
        url: "https://covid19.mathdro.id/api/",
       success: function(covidGlobal){
-      
-          console.log(covidGlobal);                                         
-      $('#globalConfirm').html(numberWithCommas(covidGlobal.confirmed.value));
-      $('#globalDeath').html(numberWithCommas(covidGlobal.deaths.value));
-      $('#globalRecover').html(numberWithCommas(covidGlobal.recovered.value));
-      }
-      });
-      }
-      function getCountry(){
-        $.ajax({
-       type: "POST",
-       url: "https://covid19.mathdro.id/api/countries",
-      success: function(getCountry){
 
-          console.log(getCountry);
-        countryDropdown='<select id="countrySelect" class="form-control" style="height: 35px; width: 50%; float: left; margin-right:2px">';
-       $.each(getCountry.countries, function(i, getCountryAll){
-            var getCountryAll= getCountry.countries[i];
-             console.log(i);
-
-  countryDropdown += '<option value="'+getCountryAll+'">'+i+'</option>';
-           });
-                                               
-      $('#countryDropdown').html(countryDropdown);
-      SelectCountry();
-      $('#countrySelect').select2({ height: '35px' });
+          //console.log(covidGlobal)
+      $('#globalConfirm').html(numberWithCommas(covidGlobal.confirmed.value))
+      $('#globalDeath').html(numberWithCommas(covidGlobal.deaths.value))
+      $('#globalRecover').html(numberWithCommas(covidGlobal.recovered.value))
+      $('#globalActive').html(numberWithCommas(parseInt(covidGlobal.confirmed.value)-(parseInt(covidGlobal.deaths.value)+parseInt(covidGlobal.recovered.value))))
+      let recoveryProgressText = (parseInt(covidGlobal.recovered.value)/parseInt(covidGlobal.confirmed.value))*100
+      recoveryProgressText = recoveryProgressText.toFixed(2)
+      $('#recoveryProgress').attr('aria-valuenow', recoveryProgressText)
+      $('#recoveryProgressText').html(recoveryProgressText+'%')
+      $('#recoveryProgress').attr('style','width:'+recoveryProgressText+'%;')
       }
-      });
+      })
       }
 
+      // set commas in numbers
       function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 }
 
-      ipLookUp();
-      globalCovid();
-      // getCountry();
+      ipLookUp()
+      globalCovid()
       SelectCountry()
-     
 
+
+      // listen to dropdown change
       function SelectCountry(){
         $('#countrySelect').on('change',function(e){
-            var data = $('#countrySelect option:selected').val();
-            console.log(data);
-              countryCovid(data);
-              $('#countryLabel').html($('#countrySelect option:selected').text());
-              $('#countrySpan').removeClass();
-              $('#countrySpan').addClass('flag-icon flag-icon-'+ data.toLowerCase() +' flag-icon-squared');
-        });
+            var data = $('#countrySelect option:selected').val()
+            //console.log(data)
+              countryCovid(data)
+              $('#countryLabel').html($('#countrySelect option:selected').text())
+              $('#countrySpan').removeClass()
+              $('#countrySpan').addClass('flag-icon flag-icon-'+ data.toLowerCase() +' flag-icon-squared')
+        })
       }
 
 
-
+// get user geo location
 function ipLookUp() {
   $.ajax({
        type: "GET",
        url: "http://ip-api.com/json",
       success: function(response) {
-          console.log('User\'s Location Data is ', response);
-          console.log('User\'s Country', response.country);
-          $('#countryLabel').html(response.country);
-          countryCovid(response.countryCode);
+          // console.log('User\'s Location Data is ', response)
+          // console.log('User\'s Country', response.country)
+          $('#countryLabel').html(response.country)
+          countryCovid(response.countryCode)
+            //$("#countrySelect").select2().select2('text',response.country);
       },
 
       error: function(data, status) {
           console.log('Request failed.  Returned status of',
-                      status);
-           $('#countryLabel').html('<small style="font-size:5px">Failed to detect Country. Please select.</small>');
+                      status)
+           $('#countryLabel').html('<small style="font-size:5px">Failed to detect Country. Please select.</small>')
       }
-      });
+      })
 
+      // country list for  dropdown
   var isoCountries = [
                 { id: 'AF', text: 'Afghanistan'},
                 { id: 'AX', text: 'Aland Islands'},
@@ -346,27 +340,28 @@ function ipLookUp() {
                 { id: 'YE', text: 'Yemen'},
                 { id: 'ZM', text: 'Zambia'},
                 { id: 'ZW', text: 'Zimbabwe'}
-            ];
-            
+            ]
+
+            // handle country flags
             function formatCountry (country) {
-              if (!country.id) { return country.text; }
+              if (!country.id) { return country.text }
               var $country = $(
                 '<span class="flag-icon flag-icon-'+ country.id.toLowerCase() +' flag-icon-squared"></span>' +
                 '<span class="flag-text">'+ country.text+"</span>"
-              );
-              return $country;
-            };
-            
-           
-            
+              )
+              return $country
+            }
+
+
+            // dropdown with select2 library
             $("[name='country']").select2({ height: '35px',
                 placeholder: "Select a country",
                 templateResult: formatCountry,
                 data: isoCountries
-            });
+            })
 }
 
 
 
 
-    });
+    })
