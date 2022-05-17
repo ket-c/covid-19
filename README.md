@@ -1,3 +1,3 @@
 # Covid-19 global and country based stats
 
-# Link: www.covid-19.hwcalc.ga
+# Link: https://ket-c.github.io/covid-19/
